@@ -7,4 +7,5 @@ Part 1
 2. Setup meeting with Drut
 
 Part 2
-1. Non adaptive ste size integrator
+1. Fixed step size integrator
+  - rk4
