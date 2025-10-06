@@ -3,7 +3,7 @@
 Part 1
 1. Determine integrator
    - Adaptive step size integrator most likely
-   - implament integrator
+   - euler, rk45, Romber's method?
 2. Setup meeting with Drut
 
 Part 2
