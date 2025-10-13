@@ -49,27 +49,35 @@ def main():
     
     t,s,it = fINT(fRHS, fORD, t0, s0, t1, nstep)
     
-    plt.figure(num=1,figsize=(10,15),dpi=100,facecolor='white')
+    plt.figure(num=1,figsize=(10,15),dpi=300,facecolor='white')
     ax = plt.axes(projection='3d')
     ax.plot3D(s[0], s[1], s[2], 'blue') # plotting x, y, z
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.show()
-    plt.figure(num=1,figsize=(12,8),dpi=100,facecolor='white')
-    plt.subplot(221)
+    
+    # x vs t
+    plt.figure(num=1,figsize=(20,10),dpi=100,facecolor='white')
+    plt.subplot(311)
     plt.plot(t,s[0])
     plt.xlabel('t')
     plt.ylabel('x')
-    plt.subplot(222)
+    # y vs t
+    plt.subplot(312)
     plt.plot(t,s[1])
     plt.xlabel('t')
     plt.ylabel('y')
-    plt.subplot(223)
+    # z vs t
+    plt.subplot(313)
     plt.plot(t,s[2])
     plt.xlabel('t')
     plt.ylabel('z')
     plt.show()
+    
+    x = s[0]
+    y = s[1]
+    z = s[2]
 
     
     return s, it
