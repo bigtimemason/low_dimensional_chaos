@@ -1,7 +1,4 @@
 import numpy as np
-import ode_integrators
-import chaos_p1
-import chaos_p2
 
 
 def rk4(fRHS,x0,y0,dx):
