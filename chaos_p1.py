@@ -2,18 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ode_integrators as odeint
 import ode_step as step
-from mpl_toolkits import mplot3d
 
-# initial 
-sig = 10
+# Constants
+sig = 10.0
 b = 8/3
+r = 212
 
 # ========================================
 # s = array containing x(t), y(t), z(t)
 # r is variable and defined in main
 # returns and array containing time derivatives of x,y,z
 # ----------------------------------------
-def dsdt(s, r):
+def dsdt(t, s, dt):
     
     x = s[0]
     y = s[1]
@@ -29,7 +29,7 @@ def dsdt(s, r):
 
 def ode_init():
           
-    fRHS    = dsdt     
+    fRHS    = dsdt   
     fINT    = odeint.ode_ivp   
     fORD    = step.rk4                    
 
@@ -37,18 +37,41 @@ def ode_init():
 
 def main():
     
-    nstep = 1000
+    nstep = 10000
+    t0 = 0.0
     x0 = 10.0
     y0 = 10.0
     z0 = 10.0
+    s0 = np.array([x0, y0, z0])
+    t1 = 30.0
     
     fINT, fORD, fRHS = ode_init()
-    fBVP = 0
-    s0 = np.array(x0, y0, z0)
     
-    x,y,z,it = fINT(fRHS, fORD, fBVP, x0, y0, z0, nstep)
+    t,s,it = fINT(fRHS, fORD, t0, s0, t1, nstep)
     
+    plt.figure(num=1,figsize=(10,15),dpi=100,facecolor='white')
+    ax = plt.axes(projection='3d')
+    ax.plot3D(s[0], s[1], s[2], 'blue') # plotting x, y, z
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    plt.show()
+    plt.figure(num=1,figsize=(12,8),dpi=100,facecolor='white')
+    plt.subplot(221)
+    plt.plot(t,s[0])
+    plt.xlabel('t')
+    plt.ylabel('x')
+    plt.subplot(222)
+    plt.plot(t,s[1])
+    plt.xlabel('t')
+    plt.ylabel('y')
+    plt.subplot(223)
+    plt.plot(t,s[2])
+    plt.xlabel('t')
+    plt.ylabel('z')
+    plt.show()
+
     
-    return x, y, z, it
+    return s, it
 
 main()
