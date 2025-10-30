@@ -1,15 +1,25 @@
 import numpy as np
 
-def rk4(fRHS,t,s0,dt):
+def rk45(fRHS,t,s0,dt):
 
-    k1 = dt*fRHS(t,s0,dt)
-    k2 = dt*fRHS(t + dt/2,s0 + k1/2,dt)
-    k3 = dt*fRHS(t + dt/2,s0 + k2/2,dt)
-    k4 = dt*fRHS(t + dt/1,s0 + k3/1,dt)
-    
-    s = s0 + (k1+k4)/6 + (k2+k3)/3
+    ai    = [0, 0.2, 0.3, 0.6, 1, 7 / 8]
+    bij   = [[], [0.2], [3 / 40, 9 / 40], [0.3, -0.9, 1.2], [-11 / 54, 2.5, -70 / 27, 35 / 27], 
+             [1631 / 55296, 175 / 512, 575 / 13824, 44275 / 110592, 253 / 4096]]
+    ci    = [37/378, 0, 250 / 621, 125 / 594, 0, 512 / 1771]
+    ci_st = [2825 / 27648, 0, 18575 / 48384, 13525 / 55296, 277 / 14336, 0.25]
+    #Kuttas
+    k1    = dt*fRHS(t,s0,dt)
+    k2    = dt*fRHS(t + (ai[1] * dt),s0 + (bij[1][0]*k1),dt)
+    k3    = dt*fRHS(t + (ai[2] * dt),s0 + (bij[2][0]*k1) + (bij[2][1]*k2),dt)
+    k4    = dt*fRHS(t + (ai[3] * dt),s0 + (bij[3][0]*k1) + (bij[3][1]*k2) + (bij[3][2]*k3),dt)
+    k5    = dt*fRHS(t + (ai[4] * dt),s0 + (bij[4][0]*k1) + (bij[4][1]*k2) + (bij[4][2]*k3) + (bij[4][3]*k4),dt)
+    k6    = dt*fRHS(t + (ai[5] * dt),s0 + (bij[5][0]*k1) + (bij[5][1]*k2) + (bij[5][2]*k3) + (bij[5][3]*k4) + (bij[5][4]*k5),dt)
+    #General Form
+    s_gen = s0 + (ci[0] * k1) + (ci[1] * k2) + (ci[2] * k3) + (ci[3] * k4) + (ci[4] * k5) + (ci[5] * k6)
+    #Embedded Form
+    s_emb = s0 + (ci_st[0] * k1) + (ci_st[1] * k2) + (ci_st[2] * k3) + (ci_st[3] * k4) + (ci_st[4] * k5) + (ci_st[5] * k6)
 
-    return s,1
+    return s_gen,s_emb,1
 
 def rk45single(fRHS,t,s0,dt):
     a         = np.array([0.0,0.2,0.3,0.6,1.0,0.875]) # weights for x
