@@ -6,7 +6,7 @@ import ode_step as step
 # Constants
 sig = 10.0
 b = 8/3
-r = 212
+r = 166.83
 
 # ========================================
 # s = array containing x(t), y(t), z(t)
@@ -30,14 +30,14 @@ def dsdt(t, s, dt):
 def ode_init():
           
     fRHS    = dsdt   
-    fINT    = odeint.ode_ivp   
-    fORD    = step.rk45bare                   
+    fINT    = odeint.ode_ivp
+    fORD    = step.rk45                   
 
     return fINT,fORD,fRHS
 
 def main():
     
-    nstep = 200000
+    nstep = 2000
     t0 = 0.0
     x0 = 10.0
     y0 = 10.0
