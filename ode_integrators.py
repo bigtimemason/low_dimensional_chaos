@@ -12,7 +12,7 @@ def ode_ivp(fRHS,fORD,t0,s0,t1,nstep):
     for k in range(1,nstep+1):
         s_gen,s_emb,_ = fORD(fRHS,t[k-1],s[:,k-1],dt)
         err = np.max(np.abs(s_gen - s_emb))
-        tol = np.max(1e-6 * (np.abs(s_gen) + (dt * fRHS(t[k-1],s[:,k-1],dt))))
+        tol = np.max(1e-9 * (np.abs(s_gen) + (dt * fRHS(t[k-1],s[:,k-1],dt))))
         if err == 0:
             err = tol / 10e6
         h1 = dt * ((tol / err) ** 0.2)
@@ -26,7 +26,7 @@ def ode_ivp(fRHS,fORD,t0,s0,t1,nstep):
                 dt = h1
                 s_gen,s_emb,_ = fORD(fRHS,t[k-1],s[:,k-1],dt)
                 err = np.max(np.abs(s_gen - s_emb))
-                tol = np.max(1e-6 * (np.abs(s_gen) + (dt * fRHS(t[k-1],s[:,k-1],dt))))
+                tol = np.max(1e-9 * (np.abs(s_gen) + (dt * fRHS(t[k-1],s[:,k-1],dt))))
                 if err == 0:
                     break
                 h1 = dt * ((tol / err) ** 0.2)
