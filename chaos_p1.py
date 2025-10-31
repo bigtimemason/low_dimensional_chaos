@@ -84,25 +84,29 @@ def main():
     dz = x*y - b*z
     
     zmax_ary = []
-    zi_ary = []
-    zi1_ary = []
-
-    for i in range(0, len(dz)):
-        tol = 0.1*r  # tolerance proportional to r so that it is adaptable
-        if np.round(abs(dz[i])) <= 0.0 + tol:
-            
-            if dz[i - 1] > 0 and dz[i + 1] < 0: # checks if the point is a local maximum
-                zmax = z[i]
-                zmax_ary.append(zmax)
-                
-    for j in range(len(zmax_ary) - 1): # sorting values into lists
-        zi_ary.append(zmax_ary[j])
-        zi1_ary.append(zmax_ary[j + 1])
-
+    
+    tol = 0.0001*nstep
+    for i in range(1, len(dz)):
         
+        if dz[i-1] > 0 and dz[i] <= 0:
+            diff = (dz[i-1] - dz[i])
+            
+            if abs(diff) <= 0 + tol:
+                z_max = max(z[i-1], z[i])
+            else:
+                a = dz[i-1] / diff
+
+                z_max = z[i-1] + a * (z[i] - z[i-1])
+            zmax_ary.append(z_max)
+    
+    zi_ary  = zmax_ary[:-1]
+    zi1_ary = zmax_ary[1:]
+
+   
     plt.scatter(np.array(zi_ary), np.array(zi1_ary), s=3)
     plt.xlabel('zn')
     plt.ylabel('zn+1')
+    plt.title(f'Lorenz Map for r = {r}')
     plt.show()
 
         
