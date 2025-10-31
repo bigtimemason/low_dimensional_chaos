@@ -37,7 +37,7 @@ def ode_init():
 
 def main():
     
-    nstep = 2000
+    nstep = 20000
     t0 = 0.0
     x0 = 10.0
     y0 = 10.0
