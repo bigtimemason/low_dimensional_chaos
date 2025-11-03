@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ode_integrators as odeint
 import ode_step as step
+import wave
 
 # Constants
 sig = 10.0
@@ -11,8 +12,31 @@ r = 24
 
 def generate_random_binary_sequence(n):
     return [np.random.randint(low=0, high=2) for _ in range(n)]
-
+    
 try1 = generate_random_binary_sequence(10)
+
+def generate_song_signal():
+    with wave.open("telephone ring and pick up sound effect.wav", "rb") as w:
+        n_channels = w.getnchannels()
+        sample_width = w.getsampwidth()
+        frame_rate = w.getframerate()
+        n_frames = w.getnframes()
+    
+        # Read the raw binary audio frames
+        raw_binary_data = w.readframes(n_frames)
+    
+        # Convert raw bytes to a NumPy array (assuming 16-bit PCM)
+        dtype = np.int16 if sample_width == 2 else np.uint8
+        data = np.frombuffer(raw_binary_data, dtype=dtype)
+    
+        # Reshape if stereo → average to mono
+        if n_channels > 1:
+            data = data.reshape(-1, n_channels).mean(axis=1)
+    
+        # Normalize to [-1, 1]
+        data = data.astype(np.float32) / np.iinfo(dtype).max
+    
+    return data, n_frames
 # ========================================
 # s = array containing x(t), y(t), z(t), u(t), v(t), w(t)
 # r is variable and defined in main
@@ -26,8 +50,7 @@ def dsdt(t, s, dt):
     t = float(np.atleast_1d(t)[0])  # ensure scalar time
     A = 0.3       
     Tb = 0.5      
-    n_bits = 20   # number of bits in the message
-    binary_seq = generate_random_binary_sequence(n_bits)
+    binary_seq, n_bits = generate_song_signal()  # number of bits in the message
 
 
     bit_index = int((t // Tb) % n_bits)  # wrap around when t > total duration
@@ -68,7 +91,7 @@ def ode_init():
 
 def main():
     
-    nstep = 200000
+    nstep = 20
     t0 = 0.0
     x0 = 10.0
     y0 = 10.0
@@ -78,7 +101,8 @@ def main():
     w0 = 1
     
     s0 = np.array([x0, y0, z0,u0,v0,w0])
-    t1 = 10.0
+    sound_signal1 = generate_song_signal()
+    t1 = len(sound_signal1)
     
     fINT, fORD, fRHS = ode_init()
     
@@ -127,9 +151,8 @@ def main():
     plt.ylabel('|w-z|',fontsize=18)
     
     # time versus the sound signal (change to binary signal)
-    sound_signal1 = 0.5 * np.sin(2 * np.pi * t / 0.2)
     plt.subplot(515)
-    plt.plot(t,sound_signal1, 'black')
+    plt.plot(t,sound_signal1[:t], 'black')
     plt.ylabel('s(t)',fontsize=18)
     plt.xlabel('t',fontsize=18)
     plt.legend()
