@@ -14,23 +14,24 @@ import ode_step as step
 import wave
 
 dt = 0.001
-A_SIG  = 5.0
+A_SIG  = 0.5
 TB_SIG = None
 BITS   = None   # will hold the bit sequence once
 N_BITS = None
+INPUT_MODE = "rand"   # "wav" or "rand"
 
 
 # Constants
 sig = 10.0
 b = 8/3
-r = 166.83
+r = 20
 
 def generate_random_binary_sequence(n):
-    return [np.random.randint(low=0, high=2) for _ in range(n)]
+    return [np.random.randint(low=0, high=2) for _ in range(n)], 0.01
 
 def generate_song_signal():
 
-    with wave.open('Vintage-1960s-drum-groove-loop-88-bpm.wav', "rb") as w:
+    with wave.open('Classicals.de - Satie - Gymnopedie No. 1.wav', "rb") as w:
         n_channels   = w.getnchannels()
         sample_width = w.getsampwidth()
         frame_rate   = w.getframerate()
@@ -59,7 +60,7 @@ try1 = generate_random_binary_sequence(10)
 # ----------------------------------------
 
 def dsdt(t, s, dt):
-    global BITS, N_BITS, TB_SIG, A_SIG
+    global BITS, N_BITS, TB_SIG, A_SIG, i
     
     t = float(np.atleast_1d(t)[0])
 
@@ -70,40 +71,56 @@ def dsdt(t, s, dt):
         # clamp t to >= 0, use a floor index, then wrap into [0, N_BITS-1]
         idx = int(np.floor(max(t, 0.0) / TB_SIG)) % N_BITS
         current_bit = float(BITS[idx])   # scalar 0.0 or 1.0
+        #current_bit = BITS[i]
 
     sound_signal1 = A_SIG * current_bit
 
     x, y, z, u, v, w = s
-    out = np.zeros(6)
+    dsdt = np.zeros(6)
     X_t = x + sound_signal1
-    out[0] = sig*(y - x)
-    out[1] = r*x - y - x*z
-    out[2] = x*y - b*z
-    out[3] = sig*(v - u)
-    out[4] = r*X_t - v - X_t*w
-    out[5] = X_t*v - b*w
-    return out
+    dsdt[0] = sig*(y - x)
+    dsdt[1] = r*x - y - x*z
+    dsdt[2] = x*y - b*z
+    dsdt[3] = sig*(v - u)
+    dsdt[4] = r*X_t - v - X_t*w
+    dsdt[5] = X_t*v - b*w
+    
+    return dsdt
+
 
 def ode_init():
-          
     fRHS    = dsdt   
     fINT    = odeint.ode_ivp   
-    fORD    = step.rk45bare                  
+    fORD    = step.rk45bare               
     return fINT,fORD,fRHS
+
+
+def setup_input(mode, dt):
+    global BITS, N_BITS, TB_SIG
+
+    if mode == "wav":
+        BITS, fs = generate_song_signal()     # BITS is your WAV sample stream (float array)
+        N_BITS   = len(BITS)
+        TB_SIG   = 1.0 / fs                   # one sample per “bit” in sim time
+        M        = N_BITS                     # play once
+        t1       = M * TB_SIG
+        return t1
+
+    elif mode == "rand":
+        # Use your existing random function; it returns (list, 3), we take the list
+        rand_list, _ = generate_random_binary_sequence(200000)  
+        BITS   = np.asarray(rand_list, dtype=np.uint8)
+        N_BITS = len(BITS)
+        TB_SIG = 1 * dt                     
+        M      = N_BITS
+        t1     = M * TB_SIG
+        return t1
 
 def main():
     global dt, sound_data, BITS, N_BITS, TB_SIG
-    BITS, fs = generate_song_signal()
-    N_BITS = len(BITS)
     
-    # Choose how many WAV samples per bit. Pick k so you get ~10 ODE steps per bit
-    TB_SIG = 1.0 / fs                           # <<< single source of truth for bit timing
-    
-    # Simulate exactly M bits (<= N_BITS) so time domains match nicely
-    M = min(N_BITS, N_BITS)                   # pick how many bits you want to use
-    t1 = M * TB_SIG
-    
-    nstep = 10000
+    t1 = setup_input(INPUT_MODE, dt)
+
     t0 = 0.0
     x0 = 10.0
     y0 = 10.0
@@ -111,6 +128,8 @@ def main():
     u0 = 1.0
     v0 = 1.0
     w0 = 1.0
+    
+    nstep = int(np.floor((t1 - t0)/dt))
     
     s0 = np.array([x0, y0, z0,u0,v0,w0])
     
@@ -161,6 +180,8 @@ def main():
     plt.plot(t,np.abs(s[5]-s[2]), 'blue')
     plt.ylabel('|w-z|',fontsize=18)
     
+    
+    
     A = A_SIG
     Tb = TB_SIG
     
@@ -176,7 +197,7 @@ def main():
     # --- Plot both ---
     plt.subplot(515)
     plt.plot(t, recovered, 'k')
-    plt.xlabel('Time')
+    plt.xlabel('Time (s)')
     plt.ylabel('Signal')
     plt.show()
     
