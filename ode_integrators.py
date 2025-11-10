@@ -6,7 +6,8 @@ def ode_ivp(fRHS,fORD,t0,s0,t1,nstep):
     t       = np.linspace(t0,t1,nstep+1)   # generates equal-distant support points
     s       = np.zeros((nvar,nstep+1)) 
     s[:,0]  = s0                         
-    dt      = 0.01                    # ???? step size - IMPLAMENT ADAPTIVE STEP SIZE
+    dt      = float((t1 - t0)/nstep)
+
     it      = np.zeros(nstep+1)
     
     for k in range(1,nstep+1):
