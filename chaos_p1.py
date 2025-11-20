@@ -32,7 +32,7 @@ def dsdt(t, s, dt):
 def ode_init():
           
     fRHS    = dsdt   
-    fINT    = odeint.ode_ivp
+    fINT    = odeint.ode_ivpp1
     fORD    = step.rk45                   
 
     return fINT,fORD,fRHS
