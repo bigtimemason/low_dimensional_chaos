@@ -6,7 +6,7 @@ Created on Tue Nov  4 10:57:49 2025
 @author: masonmiller
 """
 
-# -*- coding: utf-8 -*-
+
 import numpy as np
 import matplotlib.pyplot as plt
 import ode_integrators as odeint
@@ -16,7 +16,7 @@ import wave
 dt = 0.001
 A_SIG  = 0.5
 TB_SIG = None
-BITS   = None   # will hold the bit sequence once
+BITS   = None  
 N_BITS = None
 INPUT_MODE = "rand"   # "wav" or "rand"
 
@@ -42,7 +42,7 @@ def generate_song_signal():
     dtype = np.int16 if sample_width == 2 else np.uint8
     data = np.frombuffer(raw_data, dtype=dtype)
 
-    # If stereo, average to mono
+
     if n_channels > 1:
         data = data.reshape(-1, n_channels).mean(axis=1)
 
@@ -64,13 +64,13 @@ def dsdt(t, s, dt):
     
     t = float(np.atleast_1d(t)[0])
 
-     # --- robust bit index from time ---
+
     if N_BITS is None or N_BITS == 0 or not np.isfinite(TB_SIG) or TB_SIG <= 0:
         current_bit = 0.0
     else:
-        # clamp t to >= 0, use a floor index, then wrap into [0, N_BITS-1]
+       
         idx = int(np.floor(max(t, 0.0) / TB_SIG)) % N_BITS
-        current_bit = float(BITS[idx])   # scalar 0.0 or 1.0
+        current_bit = float(BITS[idx])  
         #current_bit = BITS[i]
 
     sound_signal1 = A_SIG * current_bit
@@ -99,15 +99,15 @@ def setup_input(mode, dt):
     global BITS, N_BITS, TB_SIG
 
     if mode == "wav":
-        BITS, fs = generate_song_signal()     # BITS is your WAV sample stream (float array)
+        BITS, fs = generate_song_signal()     
         N_BITS   = len(BITS)
-        TB_SIG   = 1.0 / fs                   # one sample per “bit” in sim time
-        M        = N_BITS                     # play once
+        TB_SIG   = 1.0 / fs                   
+        M        = N_BITS                    
         t1       = M * TB_SIG
         return t1
 
     elif mode == "rand":
-        # Use your existing random function; it returns (list, 3), we take the list
+        
         rand_list, _ = generate_random_binary_sequence(200000)  
         BITS   = np.asarray(rand_list, dtype=np.uint8)
         N_BITS = len(BITS)
@@ -191,7 +191,7 @@ def main():
         idx = ((t // Tb) % N_BITS).astype(int)
         s_on_t = A * BITS[idx]              # original injected message
     
-    # Now recovered signal from integrated data:
+
     recovered = (s[0] + s_on_t) - s[3]      # X = x + s(t), so X - u = s(t)
     
     # --- Plot both ---
